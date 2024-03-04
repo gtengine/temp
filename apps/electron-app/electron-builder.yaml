@@ -1,0 +1,7 @@
+appId: "argo.nsr.qsoc"
+productName: "QSoC-Perf"
+copyright: "Copyright 2024 Argo Inc."
+win:
+  target:
+    - target: nsis
+  # icon: "resources/icon.ico"

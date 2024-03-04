@@ -1,0 +1,19 @@
+{
+  "name": "@qsoc/js-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "tsc": "npx tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:^",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "usb": "^2.11.0"
+  }
+}
