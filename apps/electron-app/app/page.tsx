@@ -12,6 +12,7 @@ import { useTest } from "@/hook/use-test";
 import { DeviceInfoType } from "@/types/device";
 import { classNames } from "@/util/class-name";
 import FlowChart from "@/components/flow-chart";
+import MeasurementSectionDetail from "@/components/modals/measurement-detail";
 
 //  단일 모듈 시험 페이지
 export default function Home() {
@@ -38,6 +39,13 @@ export default function Home() {
     vendorId: "0x0692",
     productId: "0x9912",
   });
+
+  // 모달
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  // 모달 생성
+  const openModal = () => setIsModalOpen(true);
+  // 모달 닫기
+  const closeModal = () => setIsModalOpen(false);
 
   // 시험 결과 데이터
   const data: ChartData<"bar"> = {
@@ -170,10 +178,15 @@ export default function Home() {
         </section>
         {/* 모달 생성 및 시험 결과 csv 저장 */}
         <section className="right--container space-x-6 flex justify-end items-end">
-          <button className="btn--theme py-1">성능 측정 구간 상세</button>
+          <button className="btn--theme py-1" onClick={openModal}>
+            성능 측정 구간 상세
+          </button>
           <button className="btn--theme py-1">.csv 저장</button>
         </section>
       </div>
+      {isModalOpen && (
+        <MeasurementSectionDetail onClose={closeModal} language={language} />
+      )}
     </main>
   );
 }

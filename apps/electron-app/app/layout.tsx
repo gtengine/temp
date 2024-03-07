@@ -12,7 +12,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className}`}>
+      <body className={`${inter.className} w-[1184px] h-[834px]`}>
         <Header />
         <div className="px-6 py-5">{children}</div>
       </body>

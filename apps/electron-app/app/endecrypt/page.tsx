@@ -11,6 +11,7 @@ import { apis } from "@/constants/api-list";
 import { useTest } from "@/hook/use-test";
 import { DeviceInfoType } from "@/types/device";
 import { classNames } from "@/util/class-name";
+import FlowChart from "@/components/flow-chart";
 
 //  단일 모듈 시험 페이지
 export default function Home() {
@@ -97,7 +98,12 @@ export default function Home() {
         </section>
 
         {/* 성능 측정 구간 간소화 이미지 */}
-        <section className="right--container">성능 측정 구간</section>
+        <section className="right--container">
+          <h2 className="font-bold">성능 측정 구간</h2>
+          <div className="pl-8 flex h-full items-center justify-center">
+            <FlowChart language={language} />
+          </div>
+        </section>
       </div>
 
       <div className="outer">
