@@ -1,7 +1,5 @@
 import mermaid from "mermaid";
 import { useEffect } from "react";
-import "@/app/globals.css";
-import { classNames } from "@/util/class-name";
 
 export default function MermaidChart({
   chart,

@@ -36,8 +36,7 @@
   @apply bg-indigo-600 text-center text-white rounded-md hover:bg-indigo-500 px-3;
 }
 
-/*****************************************************/
-
-.mermaid .actor text {
-  font-size: 20px !important;
+/**react flow pane bg***************************************************/
+.react-flow__renderer {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="lightgray"><circle cx="10" cy="10" r="1"/></svg>');
 }

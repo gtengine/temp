@@ -56,6 +56,8 @@ export default function PerformanceChart({ data }: { data: ChartData<"bar"> }) {
         },
       },
     },
+    responsive: true,
+    maintainAspectRatio: true,
   };
   return <Bar data={data} options={options} />;
 }

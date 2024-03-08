@@ -23,7 +23,7 @@ function CustomNode({ data }: { data: CustomNodeData }) {
   const leftBottom = { top: 40, opacity: 0 };
 
   return (
-    <div className="border border-gray-900 w-28 h-14 flex items-center justify-center">
+    <div className="border border-gray-900 w-28 h-14 flex items-center justify-center bg-white">
       <Handle
         id="rt"
         type="source"
@@ -73,6 +73,7 @@ export default function FlowChart({ language }: { language: string }) {
   const [nodes, setNodes, onNodesChange] = useNodesState(getNodes(language));
   const [edges, setEdges, onEdgesChange] = useEdgesState(getEdges(language));
 
+  // 언어 선택에 따라 flow 차트 변경
   useEffect(() => {
     if (language === "C") {
       setNodes(getNodes(language));
@@ -89,14 +90,17 @@ export default function FlowChart({ language }: { language: string }) {
   );
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      nodeTypes={nodeTypes}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      fitView
-    ></ReactFlow>
+    <div className="w-full h-80%">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        fitView
+        nodesDraggable={false}
+      />
+    </div>
   );
 }

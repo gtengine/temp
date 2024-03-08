@@ -6,7 +6,7 @@ export const getNodes = (language: string): Node[] => [
     id: "1",
     type: "customNode",
     data: { label: "성능시험<br />프로그램" },
-    position: { x: 0, y: 50 },
+    position: { x: 0, y: 0 },
   },
   ...(language === "C"
     ? [
@@ -14,7 +14,7 @@ export const getNodes = (language: string): Node[] => [
           id: "2",
           type: "customNode",
           data: { label: "JS Wrapper" },
-          position: { x: 150, y: 50 },
+          position: { x: 150, y: 0 },
         },
       ]
     : []),
@@ -22,25 +22,25 @@ export const getNodes = (language: string): Node[] => [
     id: "3",
     type: "customNode",
     data: { label: language === "C" ? "C API" : "JS API" },
-    position: { x: 300, y: 50 },
+    position: { x: 300, y: 0 },
   },
   {
     id: "4",
     type: "customNode",
     data: { label: "libUSB" },
-    position: { x: 450, y: 50 },
+    position: { x: 450, y: 0 },
   },
   {
     id: "5",
     type: "customNode",
     data: { label: "Q-SoC" },
-    position: { x: 600, y: 50 },
+    position: { x: 600, y: 0 },
   },
   {
     id: "6",
     data: { label: "성능 측정 구간" },
     type: "customGroup",
-    position: { x: 290, y: 0 },
+    position: { x: 290, y: -50 },
   },
 ];
 
