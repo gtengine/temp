@@ -146,7 +146,7 @@ export default function Home() {
 
           <div className="contents--container flex h-full items-center">
             {/* 시험 결과 차트 */}
-            <div className="w-95% h-full flex items-center">
+            <div className="w-full h-full flex items-center border shadow-md">
               <PerformanceChart data={data} />
             </div>
           </div>
