@@ -5,7 +5,7 @@
 /** 컨테이너 *****************************************/
 
 .outer {
-  @apply flex space-x-8;
+  @apply flex space-x-8 mt-4;
 }
 
 .left--container {
@@ -34,4 +34,10 @@
 
 .btn--theme {
   @apply bg-indigo-600 text-center text-white rounded-md hover:bg-indigo-500 px-3;
+}
+
+/*****************************************************/
+
+.mermaid .actor text {
+  font-size: 20px !important;
 }

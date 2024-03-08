@@ -52,7 +52,7 @@ export default function Header() {
       {/* 로고 */}
       <div className="flex items-center space-x-4">
         <div
-          className={`text-xl font-extrabold ${lora.className} bg-white rounded-lg text-indigo-600 px-3 py-2 hover:text-indigo-400 cursor-pointer select-none`}
+          className={`text-lg font-extrabold ${lora.className} bg-white rounded-lg text-indigo-600 px-3 py-2 hover:text-indigo-400 cursor-pointer select-none`}
           onClick={() => router.push(ROUTE.module)}
         >
           Q-SoC
@@ -70,7 +70,7 @@ export default function Header() {
                 item.current
                   ? "bg-indigo-700"
                   : "hover:bg-indigo-500 hover:bg-opacity-75",
-                "px-3 py-2 cursor-pointer text-white rounded-md select-none"
+                "px-3 py-2 cursor-pointer text-white text-base rounded-md select-none"
               )}
               onClick={() => router.push(item.href)}
             >

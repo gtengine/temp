@@ -36,7 +36,10 @@ function CustomNode({ data }: { data: CustomNodeData }) {
         position={Position.Right}
         style={rightBottom}
       />
-      <div dangerouslySetInnerHTML={{ __html: data.label }} />
+      <div
+        style={{ fontSize: 18 }}
+        dangerouslySetInnerHTML={{ __html: data.label }}
+      />
       <Handle id="lt" type="target" position={Position.Left} style={leftTop} />
       <Handle
         id="lb"
@@ -52,7 +55,10 @@ function CustomNode({ data }: { data: CustomNodeData }) {
 function CustomGroupNode({ data }: { data: CustomNodeData }) {
   return (
     <div className="w-[430px] border border-gray-900 bg-none h-32 flex justify-center font-bold bg-purple-500 bg-opacity-5">
-      <div dangerouslySetInnerHTML={{ __html: data.label }} />
+      <div
+        style={{ fontSize: 18 }}
+        dangerouslySetInnerHTML={{ __html: data.label }}
+      />
     </div>
   );
 }

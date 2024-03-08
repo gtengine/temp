@@ -12,9 +12,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} w-[1184px] h-[834px]`}>
-        <Header />
-        <div className="px-6 py-5">{children}</div>
+      <body
+        className={`${inter.className} min-w-[967px] flex flex-col items-center`}
+      >
+        <div className="sticky top-0 w-full z-10">
+          <Header />
+        </div>
+        <div className="w-full px-6 py-5">{children}</div>
       </body>
     </html>
   );

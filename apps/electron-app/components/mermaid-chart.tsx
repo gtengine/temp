@@ -1,11 +1,27 @@
 import mermaid from "mermaid";
 import { useEffect } from "react";
+import "@/app/globals.css";
+import { classNames } from "@/util/class-name";
 
-export default function MermaidChart({ chart }: { chart: string }) {
+export default function MermaidChart({
+  chart,
+  language,
+}: {
+  chart: string;
+  language: string;
+}) {
   useEffect(() => {
-    mermaid.initialize({ startOnLoad: true });
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "default",
+      fontSize: 20,
+    });
     mermaid.contentLoaded();
   }, []);
 
-  return <div className="mermaid">{chart}</div>;
+  return (
+    <div className={language === "C" ? "w-85% h-85%" : "w-80% h-80%"}>
+      <div className="mermaid">{chart}</div>
+    </div>
+  );
 }
