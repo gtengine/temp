@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const serve = require("electron-serve");
 const path = require("path");
 /******************************************************************** */
+const { listUsbDevices } = require("@qsoc/js-api");
 
 const appServe = app.isPackaged
   ? serve({
@@ -39,8 +40,7 @@ app.on("ready", () => {
 
   // 장치 리스트
   ipcMain.on("req-device-list", (event, message) => {
-    console.log(message);
-    event.sender.send("res-device-list", "response from main");
+    event.sender.send("res-device-list", listUsbDevices());
   });
 });
 
