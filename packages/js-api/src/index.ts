@@ -463,3 +463,10 @@ export async function measureChunkPref(bytes: number, chunk: number) {
     await closeDevice(webDevice);
   }
 }
+
+/************************** WebUSB *******************************/
+export const webUSBList = async () => {
+  const devices = await usb.webusb.getDevices();
+  console.log(devices);
+  return devices;
+};

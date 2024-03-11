@@ -4,7 +4,7 @@ import {
 } from "@/constants/detail-sequence-data";
 import MermaidChart from "../mermaid-chart";
 
-export default function MeasurementSectionDetail({
+export default function MeasurementSectionDetailModal({
   onClose,
   language,
 }: {

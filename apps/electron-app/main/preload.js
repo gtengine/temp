@@ -1,10 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld("electronAPI", {
-    on: (channel, callback) => {
-        ipcRenderer.on(channel, callback);
-    },
-    send: (channel, args) => {
-        ipcRenderer.send(channel, args);
-    }
+contextBridge.exposeInMainWorld("device", {
+  sendMessage: (message) => ipcRenderer.send("req-device-list", message),
+  receiveMessage: (callback) =>
+    ipcRenderer.on("res-device-list", (event, message) => callback(message)),
 });

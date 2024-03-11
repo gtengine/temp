@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartData } from "chart.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 /*********************************************************************************** */
 import ListboxSet from "@/components/listbox";
 import PerformanceChart from "@/components/perf-chart";
@@ -12,7 +12,9 @@ import { useTest } from "@/hook/use-test";
 import { DeviceInfoType } from "@/types/device";
 import { classNames } from "@/util/class-name";
 import FlowChart from "@/components/flow-chart";
-import MeasurementSectionDetail from "@/components/modals/measurement-detail";
+import MeasurementSectionDetailModal from "@/components/modals/measurement-detail";
+import { useModal } from "@/hook/use-modal";
+import DeviceListModal from "@/components/modals/device-list";
 
 //  단일 모듈 시험 페이지
 export default function Home() {
@@ -27,9 +29,18 @@ export default function Home() {
     setModeOption,
   } = useTest();
 
-  console.log(language);
-  console.log(api);
-  console.log(modeOption);
+  const {
+    isDetailModalOpen,
+    openDetailModal,
+    closeDetailModal,
+    isSearchDeviceModalOpen,
+    openDeviceModal,
+    closeDeviceModal,
+  } = useModal();
+
+  // console.log(language);
+  // console.log(api);
+  // console.log(modeOption);
 
   // 장치 정보
   const [device, setDevice] = useState<DeviceInfoType>({
@@ -39,13 +50,6 @@ export default function Home() {
     vendorId: "0x0692",
     productId: "0x9912",
   });
-
-  // 모달
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  // 모달 생성
-  const openModal = () => setIsModalOpen(true);
-  // 모달 닫기
-  const closeModal = () => setIsModalOpen(false);
 
   // 시험 결과 데이터
   const data: ChartData<"bar"> = {
@@ -65,6 +69,24 @@ export default function Home() {
     failure: 0,
   };
 
+  // 메인으로 부터 USB 장치 리스트 수신
+  useEffect(() => {
+    window.device.receiveMessage((message: any) => {
+      console.log(message);
+    });
+  }, []);
+
+  // USB 장치 리스트 요청
+  const reqDeviceList = () => {
+    window.device.sendMessage("request from renderer");
+  };
+
+  // 장치 검색 버튼 클릭 핸들러
+  const onClickDeviceButtonHandler = () => {
+    reqDeviceList();
+    openDeviceModal();
+  };
+
   return (
     <main className="">
       <div className="outer">
@@ -72,7 +94,12 @@ export default function Home() {
         <section className="left--container">
           <div className="flex w-full items-center justify-between">
             <h2 className="font-bold">장치 선택</h2>
-            <button className="btn--theme text-sm py-1">장치 검색</button>
+            <button
+              onClick={onClickDeviceButtonHandler}
+              className="btn--theme text-sm py-1"
+            >
+              장치 검색
+            </button>
           </div>
 
           <div className="contents--container flex flex-col w-full justify-end text-sm">
@@ -178,14 +205,20 @@ export default function Home() {
         </section>
         {/* 모달 생성 및 시험 결과 csv 저장 */}
         <section className="right--container space-x-6 flex justify-end items-end">
-          <button className="btn--theme py-1" onClick={openModal}>
+          <button className="btn--theme py-1" onClick={openDetailModal}>
             성능 측정 구간 상세
           </button>
           <button className="btn--theme py-1">.csv 저장</button>
         </section>
       </div>
-      {isModalOpen && (
-        <MeasurementSectionDetail onClose={closeModal} language={language} />
+      {isDetailModalOpen && (
+        <MeasurementSectionDetailModal
+          onClose={closeDetailModal}
+          language={language}
+        />
+      )}
+      {isSearchDeviceModalOpen && (
+        <DeviceListModal onClose={closeDeviceModal} />
       )}
     </main>
   );
