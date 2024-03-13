@@ -1,5 +1,5 @@
 export interface DeviceInfoType {
-  chipId: number;
+  productName: string;
   serialNumber: number;
   manufacturer: string;
   vendorId: string;

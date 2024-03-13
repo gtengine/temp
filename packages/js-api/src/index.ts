@@ -11,6 +11,9 @@ import { parseTransInData, printCiBuffer } from "./fw-info";
 import { UsbDeviceInfo } from "./types/usb";
 import { calculateMbps, closeDevice, printResult, startMessage } from "./utils";
 
+const VID = 0x0692;
+const PID = 0x9912;
+
 /**
  * 연결된 USB 장치들을 리스트로 반환
  * @returns USB 장치 리스트
@@ -88,8 +91,6 @@ export async function getReadableUsbDevices(): Promise<UsbDeviceInfo[]> {
 }
 
 /****************************FX3 연동 시험 *******************************/
-const VID = 0x0692;
-const PID = 0x9912;
 let startTime;
 let endTime;
 
@@ -465,8 +466,30 @@ export async function measureChunkPref(bytes: number, chunk: number) {
 }
 
 /************************** WebUSB *******************************/
-export const webUSBList = async () => {
-  const devices = await usb.webusb.getDevices();
-  console.log(devices);
-  return devices;
+export const getWebUSBDevicesByIds = async (vid: number, pid: number) => {
+  const devices = usb.getDeviceList();
+  const filteredDevices = devices.filter(
+    (device) =>
+      device.deviceDescriptor.idVendor === vid &&
+      device.deviceDescriptor.idProduct === pid
+  );
+  const deviceInfoPromise = filteredDevices.map(async (device) => {
+    try {
+      const webDevice = await createWebUSBDevice(
+        device.deviceDescriptor.idVendor,
+        device.deviceDescriptor.idProduct
+      );
+      return {
+        productName: webDevice.productName,
+        serialNumber: webDevice.serialNumber,
+        manufacturerName: webDevice.manufacturerName,
+        productId: webDevice.productId,
+        vendorId: webDevice.vendorId,
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  });
+  const deviceInfoList = await Promise.all(deviceInfoPromise);
+  return deviceInfoList;
 };

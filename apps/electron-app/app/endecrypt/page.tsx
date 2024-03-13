@@ -32,7 +32,7 @@ export default function Home() {
 
   // 장치 정보
   const [device, setDevice] = useState<DeviceInfoType>({
-    chipId: 123456,
+    productName: "qsoc",
     serialNumber: 987654321,
     manufacturer: "아르고",
     vendorId: "0x0692",

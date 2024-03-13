@@ -2,7 +2,16 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const serve = require("electron-serve");
 const path = require("path");
 /******************************************************************** */
-const { listUsbDevices } = require("@qsoc/js-api");
+const {
+  listUsbDevices,
+  webUSBList,
+  bulkCommunication,
+  createWebUSBDevice,
+  getWebUSBDevicesByIds,
+} = require("@qsoc/js-api");
+
+const VID = 0x0692;
+const PID = 0x9912;
 
 const appServe = app.isPackaged
   ? serve({
@@ -39,8 +48,9 @@ app.on("ready", () => {
   createWindow();
 
   // 장치 리스트
-  ipcMain.on("req-device-list", (event, message) => {
-    event.sender.send("res-device-list", listUsbDevices());
+  ipcMain.on("req-device-list", async (event, message) => {
+    const deviceList = await getWebUSBDevicesByIds(VID, PID);
+    event.sender.send("res-device-list", deviceList);
   });
 });
 
