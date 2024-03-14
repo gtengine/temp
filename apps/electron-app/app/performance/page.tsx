@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartData } from "chart.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 /*********************************************************************************** */
 import ListboxSet from "@/components/listbox";
 import PerformanceChart from "@/components/perf-chart";
@@ -9,12 +9,20 @@ import SelectLanguage from "@/components/test-item-setting/select-language";
 import SelectMode from "@/components/test-item-setting/select-test-mode";
 import { apis } from "@/constants/api-list";
 import { useTest } from "@/hook/use-test";
-import { DeviceInfoType } from "@/types/device";
 import { classNames } from "@/util/class-name";
 import FlowChart from "@/components/flow-chart";
+import MeasurementSectionDetailModal from "@/components/modals/measurement-detail";
+import { useModal } from "@/hook/use-modal";
+import DeviceListModal from "@/components/modals/device-list";
+import { useDevice } from "@/hook/use-device";
+import { USBDeviceInfo } from "@qsoc/js-api/dist/types/device";
 
 //  단일 모듈 시험 페이지
 export default function Home() {
+  // 장치 정보
+  const { device, setDevice, deviceList, setDeviceList } = useDevice();
+
+  // 시험 항목
   const {
     language,
     setLanguage,
@@ -26,18 +34,18 @@ export default function Home() {
     setModeOption,
   } = useTest();
 
-  console.log(language);
-  console.log(api);
-  console.log(modeOption);
+  const {
+    isDetailModalOpen,
+    openDetailModal,
+    closeDetailModal,
+    isSearchDeviceModalOpen,
+    openDeviceModal,
+    closeDeviceModal,
+  } = useModal();
 
-  // 장치 정보
-  const [device, setDevice] = useState<DeviceInfoType>({
-    productName: "qsoc",
-    serialNumber: 987654321,
-    manufacturer: "아르고",
-    vendorId: "0x0692",
-    productId: "0x9912",
-  });
+  // console.log(language);
+  // console.log(api);
+  // console.log(modeOption);
 
   // 시험 결과 데이터
   const data: ChartData<"bar"> = {
@@ -57,14 +65,37 @@ export default function Home() {
     failure: 0,
   };
 
+  // 메인에서 USB 장치 리스트 수신
+  useEffect(() => {
+    window.device.responseDeviceList((message: USBDeviceInfo[]) => {
+      setDeviceList(message);
+    });
+  }, []);
+
+  // USB 장치 리스트 요청
+  const reqDeviceList = () => {
+    window.device.requestDeviceList("request from renderer");
+  };
+
+  // 장치 검색 버튼 클릭 핸들러
+  const onClickDeviceButtonHandler = () => {
+    reqDeviceList();
+    openDeviceModal();
+  };
+
   return (
-    <main className="space-y-4">
+    <main className="">
       <div className="outer">
         {/* 장치 선택 */}
         <section className="left--container">
           <div className="flex w-full items-center justify-between">
             <h2 className="font-bold">장치 선택</h2>
-            <button className="btn--theme text-sm py-1">장치 검색</button>
+            <button
+              onClick={onClickDeviceButtonHandler}
+              className="btn--theme text-sm py-1"
+            >
+              장치 검색
+            </button>
           </div>
 
           <div className="contents--container flex flex-col w-full justify-end text-sm">
@@ -76,7 +107,7 @@ export default function Home() {
                       index === Object.entries(device).length - 1
                         ? "border-b-[1px]"
                         : null,
-                      "w-1/2 px-3 py-2 font-bold bg-gray-200 border-t-[1px] border-l-[1px] border-gray-400"
+                      "w-1/2 px-3 py-2 font-bold bg-gray-200 border-t-[1px] border-l-[1px] border-gray-400 flex items-center"
                     )}
                   >
                     {key}
@@ -100,7 +131,7 @@ export default function Home() {
         {/* 성능 측정 구간 간소화 이미지 */}
         <section className="right--container">
           <h2 className="font-bold">성능 측정 구간</h2>
-          <div className="pl-8 flex h-full items-center justify-center">
+          <div className="pl-8 flex w-full h-full items-center justify-center">
             <FlowChart language={language} />
           </div>
         </section>
@@ -138,7 +169,7 @@ export default function Home() {
 
           <div className="contents--container flex h-full items-center">
             {/* 시험 결과 차트 */}
-            <div className="w-95%">
+            <div className="w-full h-full flex items-center border shadow-md">
               <PerformanceChart data={data} />
             </div>
           </div>
@@ -170,10 +201,25 @@ export default function Home() {
         </section>
         {/* 모달 생성 및 시험 결과 csv 저장 */}
         <section className="right--container space-x-6 flex justify-end items-end">
-          <button className="btn--theme py-1">성능 측정 구간 상세</button>
+          <button className="btn--theme py-1" onClick={openDetailModal}>
+            성능 측정 구간 상세
+          </button>
           <button className="btn--theme py-1">.csv 저장</button>
         </section>
       </div>
+      {isDetailModalOpen && (
+        <MeasurementSectionDetailModal
+          onClose={closeDetailModal}
+          language={language}
+        />
+      )}
+      {isSearchDeviceModalOpen && (
+        <DeviceListModal
+          onClose={closeDeviceModal}
+          deviceList={deviceList}
+          setDevice={setDevice}
+        />
+      )}
     </main>
   );
 }
