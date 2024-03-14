@@ -13,7 +13,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} min-w-[967px] flex flex-col items-center`}
+        className={`${inter.className} min-w-[1100px] flex flex-col items-center`}
       >
         <div className="sticky top-0 w-full z-10">
           <Header />

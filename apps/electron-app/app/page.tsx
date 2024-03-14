@@ -9,15 +9,20 @@ import SelectLanguage from "@/components/test-item-setting/select-language";
 import SelectMode from "@/components/test-item-setting/select-test-mode";
 import { apis } from "@/constants/api-list";
 import { useTest } from "@/hook/use-test";
-import { DeviceInfoType } from "@/types/device";
 import { classNames } from "@/util/class-name";
 import FlowChart from "@/components/flow-chart";
 import MeasurementSectionDetailModal from "@/components/modals/measurement-detail";
 import { useModal } from "@/hook/use-modal";
 import DeviceListModal from "@/components/modals/device-list";
+import { useDevice } from "@/hook/use-device";
+import { USBDeviceInfo } from "@qsoc/js-api/dist/types/device";
 
 //  단일 모듈 시험 페이지
 export default function Home() {
+  // 장치 정보
+  const { device, setDevice, deviceList, setDeviceList } = useDevice();
+
+  // 시험 항목
   const {
     language,
     setLanguage,
@@ -42,15 +47,6 @@ export default function Home() {
   // console.log(api);
   // console.log(modeOption);
 
-  // 장치 정보
-  const [device, setDevice] = useState<DeviceInfoType>({
-    productName: "qsoc",
-    serialNumber: 987654321,
-    manufacturer: "아르고",
-    vendorId: "0x0692",
-    productId: "0x9912",
-  });
-
   // 시험 결과 데이터
   const data: ChartData<"bar"> = {
     labels: ["1KB", "2KB", "4KB", "8KB", "16KB", "32KB", "64KB", "128KB"],
@@ -69,16 +65,16 @@ export default function Home() {
     failure: 0,
   };
 
-  // 메인으로 부터 USB 장치 리스트 수신
+  // 메인에서 USB 장치 리스트 수신
   useEffect(() => {
-    window.device.receiveMessage((message: any) => {
-      console.log(message);
+    window.device.responseDeviceList((message: USBDeviceInfo[]) => {
+      setDeviceList(message);
     });
   }, []);
 
   // USB 장치 리스트 요청
   const reqDeviceList = () => {
-    window.device.sendMessage("request from renderer");
+    window.device.requestDeviceList("request from renderer");
   };
 
   // 장치 검색 버튼 클릭 핸들러
@@ -111,7 +107,7 @@ export default function Home() {
                       index === Object.entries(device).length - 1
                         ? "border-b-[1px]"
                         : null,
-                      "w-1/2 px-3 py-2 font-bold bg-gray-200 border-t-[1px] border-l-[1px] border-gray-400"
+                      "w-1/2 px-3 py-2 font-bold bg-gray-200 border-t-[1px] border-l-[1px] border-gray-400 flex items-center"
                     )}
                   >
                     {key}
@@ -218,7 +214,11 @@ export default function Home() {
         />
       )}
       {isSearchDeviceModalOpen && (
-        <DeviceListModal onClose={closeDeviceModal} />
+        <DeviceListModal
+          onClose={closeDeviceModal}
+          deviceList={deviceList}
+          setDevice={setDevice}
+        />
       )}
     </main>
   );

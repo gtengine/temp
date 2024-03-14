@@ -3,6 +3,7 @@ import {
   sequenceDiagramJS,
 } from "@/constants/detail-sequence-data";
 import MermaidChart from "../mermaid-chart";
+import ModalContainer from "./modal-container";
 
 export default function MeasurementSectionDetailModal({
   onClose,
@@ -12,7 +13,7 @@ export default function MeasurementSectionDetailModal({
   language: string;
 }) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center select-none z-20">
+    <ModalContainer>
       <div className="bg-white min-w-[918px] min-h-[641px] w-95% h-95% p-4 rounded-lg flex flex-col justify-between">
         <h2 className="font-bold text-center">{`${language} API 성능 측정 구간 상세`}</h2>
         {/* 모달 내용 */}
@@ -26,6 +27,6 @@ export default function MeasurementSectionDetailModal({
           닫기
         </button>
       </div>
-    </div>
+    </ModalContainer>
   );
 }

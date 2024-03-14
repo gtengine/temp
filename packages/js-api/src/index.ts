@@ -1,4 +1,5 @@
 import * as usb from "usb";
+/********************************************************************************* */
 import {
   DATA_SIZE,
   _CGetFWInfo,
@@ -7,8 +8,12 @@ import {
   _CSWReset,
   _CSetSerialNumber,
 } from "./commands";
-import { parseTransInData, printCiBuffer } from "./fw-info";
-import { UsbDeviceInfo } from "./types/usb";
+import {
+  getSerialNumberFromArrayBuffer,
+  parseTransInData,
+  printCiBuffer,
+} from "./fw-info";
+import { USBDeviceInfo } from "./types/device";
 import { calculateMbps, closeDevice, printResult, startMessage } from "./utils";
 
 const VID = 0x0692;
@@ -41,53 +46,6 @@ async function getStringDescriptor(
       }
     });
   });
-}
-
-/**
- * 연결되어 있는 USB 장치들 중, 읽기 가능한 장치들의 정보들을 리스트로 반환
- * @returns 제조사 ID, 제품 ID, 시리얼 넘버, 제조사, 제품 이름들의 리스트
- */
-export async function getReadableUsbDevices(): Promise<UsbDeviceInfo[]> {
-  const devices = usb.getDeviceList();
-  const readableDevices: UsbDeviceInfo[] = [];
-  let count: number = 0;
-  for (const device of devices) {
-    try {
-      device.open();
-      const descriptor = device.deviceDescriptor;
-
-      const manufacturer = await getStringDescriptor(
-        device,
-        descriptor.iManufacturer
-      ).catch(() => null);
-      const product = await getStringDescriptor(
-        device,
-        descriptor.iProduct
-      ).catch(() => null);
-      const serialNumber = await getStringDescriptor(
-        device,
-        descriptor.iSerialNumber
-      ).catch(() => null);
-
-      readableDevices.push({
-        vendorId: descriptor.idVendor,
-        productId: descriptor.idProduct,
-        serialNumber,
-        manufacturer,
-        product,
-      });
-    } catch (error) {
-      console.error(`접근하지 못한 USB 장치: ${count}`);
-      ++count;
-    } finally {
-      try {
-        device.close();
-      } catch (closeError) {
-        console.error("USB 장치 종료 에러: ", closeError);
-      }
-    }
-  }
-  return readableDevices;
 }
 
 /****************************FX3 연동 시험 *******************************/
@@ -152,7 +110,6 @@ async function setCommunication(device: usb.WebUSBDevice) {
     device.configurations[0]?.interfaces[0]?.interfaceNumber;
   await device.selectConfiguration(1);
   await device.claimInterface(interfaceNumber);
-  console.log("Interface 점유");
 
   // 엔드포인트 설정
   const bulkOutEndpoint =
@@ -166,7 +123,6 @@ async function setCommunication(device: usb.WebUSBDevice) {
   if (!bulkOutEndpoint || !bulkInEndpoint) {
     throw new Error("필요한 엔드포인트를 찾을 수 없습니다.");
   }
-  console.log("Endpoint 설정");
 
   return { bulkOutEndpoint, bulkInEndpoint };
 }
@@ -466,30 +422,76 @@ export async function measureChunkPref(bytes: number, chunk: number) {
 }
 
 /************************** WebUSB *******************************/
-export const getWebUSBDevicesByIds = async (vid: number, pid: number) => {
-  const devices = usb.getDeviceList();
-  const filteredDevices = devices.filter(
-    (device) =>
-      device.deviceDescriptor.idVendor === vid &&
-      device.deviceDescriptor.idProduct === pid
+
+export async function bulk(
+  webDevice: usb.WebUSBDevice,
+  bulkOutEndpoint: USBEndpoint,
+  bulkInEndpoint: USBEndpoint,
+  commandNumber: number,
+  serialNumber?: string
+): Promise<USBInTransferResult> {
+  // 데이터 준비
+  const dataOut: Uint8Array = setData(
+    commandNumber,
+    serialNumber
+  ) as Uint8Array;
+  // 시작 시간 측정
+  startTime = performance.now();
+  // trans out
+  await webDevice.transferOut(bulkOutEndpoint.endpointNumber, dataOut);
+  // trans in
+  const resultIn = await webDevice.transferIn(
+    bulkInEndpoint.endpointNumber,
+    dataOut.length
   );
-  const deviceInfoPromise = filteredDevices.map(async (device) => {
+  // 종료 시간 측정
+  endTime = performance.now();
+
+  return resultIn;
+}
+
+export async function findUSBDevices(
+  vendorId: number,
+  productId: number
+): Promise<USBDeviceInfo[]> {
+  const devices = usb
+    .getDeviceList()
+    .filter(
+      (device) =>
+        device.deviceDescriptor.idVendor === vendorId &&
+        device.deviceDescriptor.idProduct === productId
+    );
+  const deviceDetails: USBDeviceInfo[] = [];
+
+  for (const device of devices) {
     try {
-      const webDevice = await createWebUSBDevice(
-        device.deviceDescriptor.idVendor,
-        device.deviceDescriptor.idProduct
+      const instance = await usb.WebUSBDevice.createInstance(device);
+      await instance.open();
+      const manufacturerName = instance.manufacturerName;
+      const productName = instance.productName;
+
+      // getFWInfo 후 serialNumber 파싱하여 가져오기
+      const { bulkOutEndpoint, bulkInEndpoint } =
+        await setCommunication(instance);
+      const resultIn = await bulk(instance, bulkOutEndpoint, bulkInEndpoint, 2);
+      // 반환값에서 마지막 null 문자 제거 후 할당
+      const serialNumber = getSerialNumberFromArrayBuffer(resultIn).replace(
+        /\0+$/,
+        ""
       );
-      return {
-        productName: webDevice.productName,
-        serialNumber: webDevice.serialNumber,
-        manufacturerName: webDevice.manufacturerName,
-        productId: webDevice.productId,
-        vendorId: webDevice.vendorId,
-      };
+      await instance.close();
+
+      deviceDetails.push({
+        productName: productName ? productName : "",
+        manufacturerName: manufacturerName ? manufacturerName : "",
+        serialNumber,
+        vendorId: instance.vendorId,
+        productId: instance.productId,
+      });
     } catch (error) {
-      console.error(error);
+      console.error(`Error accessing device: ${error}`);
     }
-  });
-  const deviceInfoList = await Promise.all(deviceInfoPromise);
-  return deviceInfoList;
-};
+  }
+
+  return deviceDetails;
+}

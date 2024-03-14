@@ -144,3 +144,28 @@ export function printCiBuffer(dataIn: Uint8Array): void {
   });
   console.log();
 }
+
+/**
+ * serialNumber를 문자로 변환 후 반환하는 함수
+ * @param resultIn TransIn 데이터
+ * @returns serialNumber
+ */
+export function getSerialNumberFromArrayBuffer(resultIn: USBInTransferResult) {
+  // serialNumber 시작 인덱스
+  const startIndex = 32;
+  // serialNumber 끝 인덱스
+  const endIndex = startIndex + CiBufferSize.serialNumber;
+
+  // 데이터 체크
+  if (!resultIn.data) {
+    throw new Error("Buffer 데이터를 확인할 수 없습니다.");
+  }
+  // 데이터 추출
+  const dataSlice = new Uint8Array(
+    resultIn.data?.buffer.slice(startIndex, endIndex)
+  );
+  // 데이터 변환
+  const ascii = String.fromCharCode(...dataSlice);
+
+  return ascii;
+}

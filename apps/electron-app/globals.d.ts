@@ -1,6 +1,6 @@
 interface Window {
   device: {
-    sendMessage: (message: string) => void;
-    receiveMessage: (callback: (message: any) => void) => void;
+    requestDeviceList: (message: string) => void;
+    responseDeviceList: (callback: (message: any) => void) => void;
   };
 }

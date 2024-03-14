@@ -2,13 +2,7 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const serve = require("electron-serve");
 const path = require("path");
 /******************************************************************** */
-const {
-  listUsbDevices,
-  webUSBList,
-  bulkCommunication,
-  createWebUSBDevice,
-  getWebUSBDevicesByIds,
-} = require("@qsoc/js-api");
+const { findUSBDevices } = require("@qsoc/js-api");
 
 const VID = 0x0692;
 const PID = 0x9912;
@@ -21,7 +15,7 @@ const appServe = app.isPackaged
 
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 1000,
+    width: 1150,
     height: 750,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -49,7 +43,7 @@ app.on("ready", () => {
 
   // 장치 리스트
   ipcMain.on("req-device-list", async (event, message) => {
-    const deviceList = await getWebUSBDevicesByIds(VID, PID);
+    const deviceList = await findUSBDevices(VID, PID);
     event.sender.send("res-device-list", deviceList);
   });
 });
