@@ -1,3 +1,4 @@
+import { apiList } from "./constants/api-list";
 import {
   CiBuffer,
   CiBufferSize,
@@ -72,10 +73,10 @@ function parseCiBuffer(hexArray: string[], index: number): void {
 /**
  * trans in buffer를 파싱하는 함수
  * @param hexDataIn 16진수 배열
- * @param command fw 명령 번호
+ * @param apiName fw 명령 번호
  * @returns
  */
-export function parseTransInData(dataIn: Uint8Array, command: number): FWInfo {
+export function parseTransInData(dataIn: Uint8Array, apiName: string): FWInfo {
   const hexDataIn = convertArrayUint8ToHex(dataIn);
 
   let ciHead: CiHead = {
@@ -99,14 +100,14 @@ export function parseTransInData(dataIn: Uint8Array, command: number): FWInfo {
     ciHead[key] = `0x${hexValue.reverse().join("")}`;
   });
 
-  if (command === 2) {
+  if (apiName === apiList.getFWInfo) {
     parseCiBuffer(hexDataIn, index);
     return {
       ciHead,
       ciBuffer,
       restData: hexDataIn.slice(index),
     };
-  } else if (command === 4) {
+  } else if (apiName === apiList.SWReset) {
     return {
       ciHead,
       restData: hexDataIn.slice(index, 64),

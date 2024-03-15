@@ -1,7 +1,6 @@
-import { printUint8ToHex } from "./fw-info";
-
 // 전체 데이터 크기
 export const DATA_SIZE = 8192;
+
 // 데이터 주입 index
 const DATA_INDEX = 16;
 

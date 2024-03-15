@@ -1,18 +1,19 @@
 import * as usb from "usb";
 import { printUint8ToHex } from "./fw-info";
+import { apiList } from "./constants/api-list";
 
-export function startMessage(commandNumber: number) {
-  switch (commandNumber) {
-    case 1:
+export function startMessage(apiName: string) {
+  switch (apiName) {
+    case apiList.loopback:
       console.log("Loop Back");
       break;
-    case 2:
+    case apiList.getFWInfo:
       console.log("Get firmware info");
       break;
-    case 3:
+    case apiList.setSerialNumber:
       console.log("Set serial-number");
       break;
-    case 4:
+    case apiList.SWReset:
       console.log("Reset software");
       break;
   }

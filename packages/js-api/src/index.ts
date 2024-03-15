@@ -15,9 +15,10 @@ import {
 } from "./fw-info";
 import { USBDeviceInfo } from "./types/device";
 import { calculateMbps, closeDevice, printResult, startMessage } from "./utils";
+import { apiList } from "./constants/api-list";
 
-const VID = 0x0692;
-const PID = 0x9912;
+export const VID = 0x0692;
+export const PID = 0x9912;
 
 /**
  * 연결된 USB 장치들을 리스트로 반환
@@ -129,38 +130,38 @@ async function setCommunication(device: usb.WebUSBDevice) {
 
 /**
  * 명령 번호에 따른 통신 데이터 설정
- * @param commandNumber 1, 2, 3, 4 (FW 명령 번호)
+ * @param apiName 1, 2, 3, 4 (FW 명령 번호)
  * @param serialNumber 3일 경우, 지정할 시리얼 넘버
  * @returns
  */
-function setData(commandNumber: number, serialNumber?: string) {
-  switch (commandNumber) {
-    case 1:
+function setData(apiName: string, serialNumber?: string) {
+  switch (apiName) {
+    case apiList.loopback:
       return _CLoopBack();
-    case 2:
+    case apiList.getFWInfo:
       return _CGetFWInfo();
-    case 3:
+    case apiList.setSerialNumber:
       if (!serialNumber) {
         throw new Error("Serial-Number 정보가 없습니다.");
       }
       return _CSetSerialNumber(serialNumber);
-    case 4:
+    case apiList.SWReset:
       return _CSWReset();
   }
 }
 
 /****************************************
  * 지정한 명령에 따른 USB 통신 함수
- * @param commandNumber 1, 2, 3, 4 (FW 명령 번호)
+ * @param apiName 1, 2, 3, 4 (FW 명령 번호)
  * @param serialNumber 3일 경우, 지정할 시리얼 넘버
  * @returns
  */
 export async function bulkCommunication(
-  commandNumber: number,
+  apiName: string,
   serialNumber?: string
 ) {
   console.log("##################################");
-  startMessage(commandNumber);
+  startMessage(apiName);
 
   const webDevice = await createWebUSBDevice(VID, PID);
   try {
@@ -171,10 +172,7 @@ export async function bulkCommunication(
       await setCommunication(webDevice);
 
     // Bulk out
-    let dataOut: Uint8Array = setData(
-      commandNumber,
-      serialNumber
-    ) as Uint8Array;
+    let dataOut: Uint8Array = setData(apiName, serialNumber) as Uint8Array;
 
     startTime = performance.now();
     await webDevice.transferOut(bulkOutEndpoint.endpointNumber, dataOut);
@@ -190,11 +188,11 @@ export async function bulkCommunication(
     }
     const dataIn = new Uint8Array(resultIn.data?.buffer);
 
-    const dataLength = commandNumber !== 4 ? DATA_SIZE : 64;
+    const dataLength = apiName !== apiList.SWReset ? DATA_SIZE : 64;
     printResult(dataOut, dataIn, dataLength);
 
     // getFWInfo, setSerialNumber일 경우에는 ciBuffer 출력
-    if (commandNumber === 2 || commandNumber === 3) {
+    if (apiName === apiList.getFWInfo || apiName === apiList.setSerialNumber) {
       // Bulk out
       const getFWdataOut = _CGetFWInfo();
       await webDevice.transferOut(bulkOutEndpoint.endpointNumber, getFWdataOut);
@@ -220,7 +218,7 @@ export async function bulkCommunication(
     // 결과 반환
     return {
       transferInStatus: resultIn.status,
-      transferInData: parseTransInData(dataIn, commandNumber),
+      transferInData: parseTransInData(dataIn, apiName),
     };
   } catch (error) {
     console.error("Error", error);
@@ -427,14 +425,11 @@ export async function bulk(
   webDevice: usb.WebUSBDevice,
   bulkOutEndpoint: USBEndpoint,
   bulkInEndpoint: USBEndpoint,
-  commandNumber: number,
+  apiName: string,
   serialNumber?: string
 ): Promise<USBInTransferResult> {
   // 데이터 준비
-  const dataOut: Uint8Array = setData(
-    commandNumber,
-    serialNumber
-  ) as Uint8Array;
+  const dataOut: Uint8Array = setData(apiName, serialNumber) as Uint8Array;
   // 시작 시간 측정
   startTime = performance.now();
   // trans out
@@ -473,7 +468,12 @@ export async function findUSBDevices(
       // getFWInfo 후 serialNumber 파싱하여 가져오기
       const { bulkOutEndpoint, bulkInEndpoint } =
         await setCommunication(instance);
-      const resultIn = await bulk(instance, bulkOutEndpoint, bulkInEndpoint, 2);
+      const resultIn = await bulk(
+        instance,
+        bulkOutEndpoint,
+        bulkInEndpoint,
+        apiList.getFWInfo
+      );
       // 반환값에서 마지막 null 문자 제거 후 할당
       const serialNumber = getSerialNumberFromArrayBuffer(resultIn).replace(
         /\0+$/,

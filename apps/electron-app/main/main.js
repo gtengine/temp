@@ -2,10 +2,7 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const serve = require("electron-serve");
 const path = require("path");
 /******************************************************************** */
-const { findUSBDevices } = require("@qsoc/js-api");
-
-const VID = 0x0692;
-const PID = 0x9912;
+const { findUSBDevices, VID, PID } = require("@qsoc/js-api");
 
 const appServe = app.isPackaged
   ? serve({
